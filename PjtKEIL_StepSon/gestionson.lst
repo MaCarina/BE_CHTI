@@ -105,83 +105,88 @@ ARM Macro Assembler    Page 2
    26 00000008                 area             moncode,code,readonly
    27 00000000         ; écrire le code ici  
    28 00000000         
-   29 00000000         callbackSon
+   29 00000000         ;StartSon proc
+   30 00000000         ;push {r4-r11,lr}
+   31 00000000         ;
+   32 00000000         
+   33 00000000         callbackSon
                                proc
-   30 00000000 E92D 4FF0       push             {r4-r11,lr}
-   31 00000004         
-   32 00000004 4B0F            ldr              r3,=Index   ;indice
-   33 00000006 F8D3 C000       ldr              r12,[r3]
-   34 0000000A F8DF B03C       ldr              r11,=LongueurSon
-   35 0000000E F8DB A000       ldr              r10,[r11]
-   36 00000012 45D4            cmp              r12,r10
-   37 00000014 D013            beq              fin
-   38 00000016 4A0D            ldr              r2,=Son     ;r2=ad Son
-   39 00000018         ;ldrsh r1,[r2] ;r1 = Son pour entier signé 16 bits
-   40 00000018         ;add r1,r1,r1; r1=N+P ==> positif
-   41 00000018         ;sub r1,r1,#1 ; r1=r1-1
-   42 00000018         ;udiv r1,r1,#92 ;r1 = r1/92
-   43 00000018 F932 201C       ldrsh            r2,[r2,r12,lsl#1] ;r2=ad r1+2/ 
+   34 00000000 E92D 4FF0       push             {r4-r11,lr}
+   35 00000004         
+   36 00000004 4B10            ldr              r3,=Index   ;indice
+   37 00000006 F8D3 C000       ldr              r12,[r3]
+   38 0000000A F8DF B040       ldr              r11,=LongueurSon
+   39 0000000E F8DB A000       ldr              r10,[r11]
+   40 00000012 45D4            cmp              r12,r10
+   41 00000014 D011            beq              setzero
+   42 00000016 4A0E            ldr              r2,=Son     ;r2=ad Son
+   43 00000018         ;ldrsh r1,[r2] ;r1 = Son pour entier signé 16 bits
+   44 00000018         ;add r1,r1,r1; r1=N+P ==> positif
+   45 00000018         ;sub r1,r1,#1 ; r1=r1-1
+   46 00000018         ;udiv r1,r1,#92 ;r1 = r1/92
+   47 00000018 F932 201C       ldrsh            r2,[r2,r12,lsl#1] ;r2=ad r1+2/ 
                                                             Son + (index << 1) 
                                                             ldr r2,[r2,r1,lsl#1
                                                             ]
-   44 0000001C         ;ldr r6,[r6,#32768]
-   45 0000001C F44F 4100       ldr              r1,=32768
-   46 00000020 440A            add              r2,r2,r1
-   47 00000022 F04F 075B       ldr              r7,=91
 
 
 
 ARM Macro Assembler    Page 3 
 
 
-   48 00000026 FBB2 F2F7       udiv             r2,r7
-   49 0000002A         
-   50 0000002A F04F 0064       ldr              r0,=100     ;arg de la fonction
-                                                            
-   51 0000002E F7FF FFFE       bl               PWM_Set_Value_TIM3_Ch3
-   52 00000032 4C07            ldr              r4,=SortieSon
-   53 00000034 8022            strh             r2,[r4]     ; SortieSon = r2
-   54 00000036         
-   55 00000036         
-   56 00000036         ;ldr r5,[r4]
-   57 00000036 F10C 0C01       add              r12,r12,#1  ;on incrémente inde
+   48 0000001C         ;ldr r6,[r6,#32768]
+   49 0000001C F44F 4100       ldr              r1,=32768
+   50 00000020 440A            add              r2,r2,r1
+   51 00000022 F04F 075B       ldr              r7,=91
+   52 00000026 FBB2 F2F7       udiv             r2,r7
+   53 0000002A         
+   54 0000002A         ;ldr r0,=360 ;arg de la fonction
+   55 0000002A 4C0A            ldr              r4,=SortieSon ;r4=SortieSon
+   56 0000002C 8022            strh             r2,[r4]     ; SortieSon = r2
+   57 0000002E         
+   58 0000002E 4610            mov              r0,r2
+   59 00000030         ;ldr r5,[r4]
+   60 00000030 F10C 0C01       add              r12,r12,#1  ;on incrémente inde
                                                             x
-   58 0000003A F8C3 C000       str              r12,[r3]
-   59 0000003E         ;mov r0,#1 ;on met 1 dans r0 car c'est l'arg des fonctio
+   61 00000034 F8C3 C000       str              r12,[r3]
+   62 00000038         ;mov r0,#1 ;on met 1 dans r0 car c'est l'arg des fonctio
                        ns
-   60 0000003E         ;-->
-   61 0000003E         ;cmp r1,r0
-   62 0000003E         ;beq vrai ;si FlagCligno==1
-   63 0000003E         
-   64 0000003E         ;si faux
-   65 0000003E         ;mov r1,#1 ;r1=1
-   66 0000003E         ;str r1,[r2]
-   67 0000003E         ;bl GPIOB_Clear
-   68 0000003E         ;b fin
-   69 0000003E         
-   70 0000003E         ;mov r1,#0 ;r1=0
-   71 0000003E         ;str r1,[r2]
-   72 0000003E         ;bl GPIOB_Set
-   73 0000003E         
-   74 0000003E         fin
-   75 0000003E         ;mov r0,r1
-   76 0000003E E8BD 4FF0       pop              {r4-r11,lr}
-   77 00000042 4770            bx               lr
-   78 00000044                 endp
-   79 00000044         
-   80 00000044         
-   81 00000044                 END
+   63 00000038         ;-->
+   64 00000038         ;cmp r1,r0
+   65 00000038         ;beq vrai ;si FlagCligno==1
+   66 00000038         
+   67 00000038         ;si faux
+   68 00000038         ;mov r1,#1 ;r1=1
+   69 00000038         ;str r1,[r2]
+   70 00000038         ;bl GPIOB_Clear
+   71 00000038         ;b fin
+   72 00000038         
+   73 00000038         ;mov r1,#0 ;r1=0
+   74 00000038         ;str r1,[r2]
+   75 00000038         ;bl GPIOB_Set
+   76 00000038 E001            b                fin
+   77 0000003A         setzero
+   78 0000003A F04F 0000       mov              r0,#0
+   79 0000003E         fin
+   80 0000003E         ;mov r0,r1
+   81 0000003E F7FF FFFE       bl               PWM_Set_Value_TIM3_Ch3
+   82 00000042 E8BD 4FF0       pop              {r4-r11,lr}
+   83 00000046 4770            bx               lr
+   84 00000048                 endp
+   85 00000048         
+   86 00000048         
+   87 00000048                 END
               00000000 
               00000000 
               00000000 
               00000000 
 Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M3 --apcs=interw
-ork --depend=.\obj\gestionson.d -o.\obj\gestionson.o -I.\RTE\_Simu -IC:\Program
-data\Keil\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include -IC:\Programdata\Keil\Ar
-m\Packs\Keil\STM32F1xx_DFP\2.3.0\Device\Include --predefine="__EVAL SETA 1" --p
-redefine="__MICROLIB SETA 1" --predefine="__UVISION_VERSION SETA 530" --predefi
-ne="_RTE_ SETA 1" --predefine="STM32F10X_MD SETA 1" --predefine="_RTE_ SETA 1" 
---list=gestionson.lst Src\GestionSon.s
+ork --depend=.\obj\gestionson.d -o.\obj\gestionson.o -I.\RTE\_CibleSondeKEIL -I
+C:\Programdata\Keil\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include -IC:\Programda
+ta\Keil\Arm\Packs\Keil\STM32F1xx_DFP\2.3.0\Device\Include --predefine="__EVAL S
+ETA 1" --predefine="__MICROLIB SETA 1" --predefine="__UVISION_VERSION SETA 530"
+ --predefine="_RTE_ SETA 1" --predefine="STM32F10X_MD SETA 1" --predefine="_RTE
+_ SETA 1" --list=gestionson.lst Src\GestionSon.s
 
 
 
@@ -209,7 +214,7 @@ Symbol: Index
    Definitions
       At line 15 in file Src\GestionSon.s
    Uses
-      At line 32 in file Src\GestionSon.s
+      At line 36 in file Src\GestionSon.s
 Comment: Index used once
 SortieSon 00000000
 
@@ -218,7 +223,7 @@ Symbol: SortieSon
       At line 14 in file Src\GestionSon.s
    Uses
       At line 16 in file Src\GestionSon.s
-      At line 52 in file Src\GestionSon.s
+      At line 55 in file Src\GestionSon.s
 
 maram 00000000
 
@@ -239,7 +244,7 @@ callbackSon 00000000
 
 Symbol: callbackSon
    Definitions
-      At line 29 in file Src\GestionSon.s
+      At line 33 in file Src\GestionSon.s
    Uses
       At line 4 in file Src\GestionSon.s
 Comment: callbackSon used once
@@ -247,9 +252,9 @@ fin 0000003E
 
 Symbol: fin
    Definitions
-      At line 74 in file Src\GestionSon.s
+      At line 79 in file Src\GestionSon.s
    Uses
-      At line 37 in file Src\GestionSon.s
+      At line 76 in file Src\GestionSon.s
 Comment: fin used once
 moncode 00000000
 
@@ -259,7 +264,15 @@ Symbol: moncode
    Uses
       None
 Comment: moncode unused
-3 symbols
+setzero 0000003A
+
+Symbol: setzero
+   Definitions
+      At line 77 in file Src\GestionSon.s
+   Uses
+      At line 41 in file Src\GestionSon.s
+Comment: setzero used once
+4 symbols
 
 
 
@@ -320,7 +333,7 @@ Symbol: LongueurSon
    Definitions
       At line 17 in file Src\GestionSon.s
    Uses
-      At line 34 in file Src\GestionSon.s
+      At line 38 in file Src\GestionSon.s
 Comment: LongueurSon used once
 PWM_Set_Value_TIM3_Ch3 00000000
 
@@ -334,7 +347,7 @@ External symbols
    Definitions
       At line 18 in file Driver\DriverJeuLaser.inc
    Uses
-      At line 51 in file Src\GestionSon.s
+      At line 81 in file Src\GestionSon.s
 Comment: PWM_Set_Value_TIM3_Ch3 used once
 Son 00000000
 
@@ -342,7 +355,7 @@ Symbol: Son
    Definitions
       At line 18 in file Src\GestionSon.s
    Uses
-      At line 38 in file Src\GestionSon.s
+      At line 42 in file Src\GestionSon.s
 Comment: Son used once
 9 symbols
-353 symbols in table
+354 symbols in table

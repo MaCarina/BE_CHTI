@@ -26,6 +26,10 @@ Index dcd 0
 	area    moncode,code,readonly
 ; écrire le code ici		
 
+;StartSon proc
+		;push {r4-r11,lr}
+		;
+
 callbackSon proc
 		push {r4-r11,lr}
 	
@@ -34,7 +38,7 @@ callbackSon proc
 		ldr r11,=LongueurSon
 		ldr r10,[r11]
 		cmp r12,r10
-		beq fin
+		beq setzero
 		ldr r2,=Son ;r2=ad Son
 		;ldrsh r1,[r2] ;r1 = Son pour entier signé 16 bits
 		;add r1,r1,r1; r1=N+P ==> positif
@@ -47,12 +51,11 @@ callbackSon proc
 		ldr r7,=91
 		udiv r2,r7
 		
-		ldr r0,=360 ;arg de la fonction
-		bl PWM_Set_Value_TIM3_Ch3
-		ldr r4,=SortieSon
+		;ldr r0,=360 ;arg de la fonction
+		ldr r4,=SortieSon ;r4=SortieSon
 		strh r2,[r4] ; SortieSon = r2
 		
-		
+		mov r0,r2
 		;ldr r5,[r4]
 		add r12,r12,#1 ;on incrémente index
 		str r12,[r3]
@@ -70,9 +73,12 @@ callbackSon proc
 		;mov r1,#0 ;r1=0
 		;str r1,[r2]
 		;bl GPIOB_Set
-	
+		b fin
+setzero
+		mov r0,#0
 fin
 		;mov r0,r1
+		bl PWM_Set_Value_TIM3_Ch3
 		pop {r4-r11,lr}
 		bx lr
 		endp
