@@ -24,6 +24,9 @@ Active_IT_Debordement_Timer(TIM4,2,callbackSon);//prio 2
 // configuration de PortB.1 (PB1) en sortie push-pull
 GPIO_Configure(GPIOB, 1, OUTPUT, OUTPUT_PPULL);
 
+	
+PWM_Init_ff(TIM3,3,720);
+GPIO_Configure(GPIOB, 0, OUTPUT, ALT_PPULL);
 //============================================================================	
 	
 	
