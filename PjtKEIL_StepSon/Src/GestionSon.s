@@ -26,10 +26,6 @@ Index dcd 0
 	area    moncode,code,readonly
 ; écrire le code ici		
 
-;StartSon proc
-		;push {r4-r11,lr}
-		;
-
 callbackSon proc
 		push {r4-r11,lr}
 	
@@ -51,35 +47,27 @@ callbackSon proc
 		ldr r7,=91
 		udiv r2,r7
 		
-		;ldr r0,=360 ;arg de la fonction
 		ldr r4,=SortieSon ;r4=SortieSon
 		strh r2,[r4] ; SortieSon = r2
 		
 		mov r0,r2
-		;ldr r5,[r4]
 		add r12,r12,#1 ;on incrémente index
 		str r12,[r3]
-		;mov r0,#1 ;on met 1 dans r0 car c'est l'arg des fonctions
-		;-->
-		;cmp r1,r0
-		;beq vrai ;si FlagCligno==1
-	
-		;si faux
-		;mov r1,#1 ;r1=1
-		;str r1,[r2]
-		;bl GPIOB_Clear
-		;b fin
-	
-		;mov r1,#0 ;r1=0
-		;str r1,[r2]
-		;bl GPIOB_Set
 		b fin
 setzero
 		mov r0,#0
+		bl StartSon
 fin
 		;mov r0,r1
 		bl PWM_Set_Value_TIM3_Ch3
 		pop {r4-r11,lr}
+		bx lr
+		endp
+			
+			
+StartSon proc
+		push {r4-r11,lr}
+		ldr r12,=0
 		bx lr
 		endp
 
