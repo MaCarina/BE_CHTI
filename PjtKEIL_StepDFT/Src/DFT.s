@@ -9,7 +9,7 @@
 
 ;Section RAM (read write):
 	area    maram,data,readwrite
-		
+Index dcd 0
 
 	
 ; ===============================================================================================
@@ -20,9 +20,25 @@
 ;Section ROM code (read only) :		
 	area    moncode,code,readonly
 ; écrire le code ici		
-
-
-
+DFT_ModuleAuCarre proc
+		push {r4-r11,lr}
+		
+		ldr r5,=Index ;indice
+		ldr r12,[r5]
+		;r0 ad du premier échantillon
+		ldr r3,[r0]
+		;somme de tous les termes
+		add r4,r4,r3
+		;décalage dans les échantillons ---> Surement faux
+		ldr r3,[r3,r5,lsl#1]
+		
+		pop {r4-r11,lr}
+		bx lr
+		endp
+			
+		;modulo 64 revient à and 63
+		;créer 2 fonctions avec paramètre de TabCos ou Sin pour cos et sin
+		;pour récupérer les valeurs de TabCos procéder comme avec les échantillons de Son
 
 
 ;Section ROM code (read only) :		
