@@ -68,6 +68,9 @@ fin
 StartSon proc
 		push {r4-r11,lr}
 		ldr r12,=0
+		ldr r3,=Index
+		str r12,[r3]
+		pop {r4-r11,lr}
 		bx lr
 		endp
 

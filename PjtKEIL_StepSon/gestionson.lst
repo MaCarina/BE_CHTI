@@ -109,13 +109,13 @@ ARM Macro Assembler    Page 2
                                proc
    30 00000000 E92D 4FF0       push             {r4-r11,lr}
    31 00000004         
-   32 00000004 4B14            ldr              r3,=Index   ;indice
+   32 00000004 4B16            ldr              r3,=Index   ;indice
    33 00000006 F8D3 C000       ldr              r12,[r3]
-   34 0000000A F8DF B050       ldr              r11,=LongueurSon
+   34 0000000A F8DF B058       ldr              r11,=LongueurSon
    35 0000000E F8DB A000       ldr              r10,[r11]
    36 00000012 45D4            cmp              r12,r10
    37 00000014 D011            beq              setzero
-   38 00000016 4A12            ldr              r2,=Son     ;r2=ad Son
+   38 00000016 4A14            ldr              r2,=Son     ;r2=ad Son
    39 00000018         ;ldrsh r1,[r2] ;r1 = Son pour entier signé 16 bits
    40 00000018         ;add r1,r1,r1; r1=N+P ==> positif
    41 00000018         ;sub r1,r1,#1 ; r1=r1-1
@@ -136,7 +136,7 @@ ARM Macro Assembler    Page 3
 
    48 00000026 FBB2 F2F7       udiv             r2,r7
    49 0000002A         
-   50 0000002A 4C0E            ldr              r4,=SortieSon ;r4=SortieSon
+   50 0000002A 4C10            ldr              r4,=SortieSon ;r4=SortieSon
    51 0000002C 8022            strh             r2,[r4]     ; SortieSon = r2
    52 0000002E         
    53 0000002E 4610            mov              r0,r2
@@ -159,12 +159,15 @@ ARM Macro Assembler    Page 3
                                proc
    69 0000004C E92D 4FF0       push             {r4-r11,lr}
    70 00000050 F04F 0C00       ldr              r12,=0
-   71 00000054 4770            bx               lr
-   72 00000056                 endp
-   73 00000056         
-   74 00000056         
-   75 00000056                 END
-              00 00 00000000 
+   71 00000054 4B02            ldr              r3,=Index
+   72 00000056 F8C3 C000       str              r12,[r3]
+   73 0000005A E8BD 4FF0       pop              {r4-r11,lr}
+   74 0000005E 4770            bx               lr
+   75 00000060                 endp
+   76 00000060         
+   77 00000060         
+   78 00000060                 END
+              00000000 
               00000000 
               00000000 
               00000000 
@@ -203,7 +206,8 @@ Symbol: Index
       At line 15 in file Src\GestionSon.s
    Uses
       At line 32 in file Src\GestionSon.s
-Comment: Index used once
+      At line 71 in file Src\GestionSon.s
+
 SortieSon 00000000
 
 Symbol: SortieSon
