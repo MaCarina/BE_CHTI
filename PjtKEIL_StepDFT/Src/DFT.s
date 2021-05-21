@@ -2,6 +2,7 @@
 	THUMB   
 		
 
+	EXPORT DFT_ModuleAuCarre
 ; ====================== zone de réservation de données,  ======================================
 ;Section RAM (read only) :
 	area    mesdata,data,readonly
@@ -9,7 +10,7 @@
 
 ;Section RAM (read write):
 	area    maram,data,readwrite
-Index dcd 0
+	export TabCos
 
 	
 ; ===============================================================================================
@@ -22,23 +23,48 @@ Index dcd 0
 ; écrire le code ici		
 DFT_ModuleAuCarre proc
 		push {r4-r11,lr}
+		mov r12,#0 ;indice de boucle
+		mov r4,#0
+	
+boucle	
 		
-		ldr r5,=Index ;indice
-		ldr r12,[r5]
-		;r0 ad du premier échantillon
-		ldr r3,[r0]
+		;récupérer les cos
+		ldr r11,=TabCos
+		;décalage dans les échantillons
+		ldrsh r11,[r11,r12,lsl#1]
+		
+		;récupérer les sin
+		;ldr r6,=TabSin
+		;ldr r1,r6
+		;décalage dans les échantillons
+		;ldr r1,[r1,r12,lsl#1]
+		
+		;décalage dans les échantillons
+		ldrsh r3,[r0,r12,lsl#1]
+		;multiplication
+		mul r3,r3,r11
 		;somme de tous les termes
 		add r4,r4,r3
-		;décalage dans les échantillons ---> Surement faux
-		ldr r3,[r3,r5,lsl#1]
 		
+		
+		add r12,r12,#1
+		;comparer avec valeur max d'index = 64
+		ldr r8,=64
+		cmp r12,r8
+		bne boucle
+	
+	
+		mov r0,r4
+		mul r0,r0,r0
 		pop {r4-r11,lr}
 		bx lr
 		endp
 			
 		;modulo 64 revient à and 63
 		;créer 2 fonctions avec paramètre de TabCos ou Sin pour cos et sin
-		;pour récupérer les valeurs de TabCos procéder comme avec les échantillons de Son
+		
+		;faire x k
+		;format (demander à Ainhoa)
 
 
 ;Section ROM code (read only) :		
