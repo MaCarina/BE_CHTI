@@ -22,22 +22,30 @@
 	area    moncode,code,readonly
 ; écrire le code ici		
 DFT_ModuleAuCarre proc
-		push {r0-r3,lr}
-		ldr r2,[r1] ;passage de k dans r2
-		ldr r1,[r0] ;passage de X(n) dans r1
-		ldr r0,=TabCos
-		b CalculerPartie
-		ldr r3,[r0]
+		push {r4-r12,lr}
+		; r0 signal
+		; r1 k
+		push {r0-r2}
+		mov r2,r1 ; k est dans r2
+		mov r1,r0 ; X(n) est dans r1
+		ldr r0,=TabCos ; TabCos est dans r0
+		bl CalculerPartie
+		mov r3,r0
 		;r3=résultat cos
+		pop {r0-r2}
+		mov r2,r1
+		mov r1,r0
 		ldr r0,=TabSin
-		b CalculerPartie
+		bl CalculerPartie
+		mov r1,r0
 		;r0=résultat sin
 		;somme des 2 résultats
-		add r3,r3,r0
-		;mise au carré
-		mul r3,r3
+		mov r0,#0
+		mov r2,#0
+		smlal r2,r0,r3,r3 ; r2,r0 = r2,r0 + r3^2
+		smlal r2,r0,r1,r1 ; r2,r0 = r2,r0 + r1^2
 		
-		pop {r0-r3,lr}
+		pop {r4-r12,lr}
 		bx lr
 		endp
 			
@@ -57,12 +65,12 @@ CalculerPartie proc
 	;r3 : x(n)
 	;r4 : resultat
 	;comparer avec valeur max d'index = 64
-	push {r4-r12,lr}
+	push {r1-r3,r4-r12,lr}
 	mov r4,#0 ;résultat
 	mov r12,#0 ;indice de boucle
 boucle
-	mul r7,r12,r2
-	and r7,r7,#63
+	mul r7,r12,r2 ;calcul de p
+	and r7,#63 ;p modulo 63 pour le remettre dans le bon intervalle
 	ldrsh r11,[r0,r7,lsl#1] ; décalage dans les cos/sin
 	ldrsh r3,[r1,r12,lsl#1] ; décalage dans le signal
 	mla r4,r11,r3,r4 ; r4 = r11*r3 + r4 E.F * E'.F' => E+E',F+F' donc ici 5.27
@@ -72,7 +80,7 @@ boucle
 	cmp r12,r8
 	bne boucle
 	mov r0,r4
-	pop {r4-r12,lr}
+	pop {r1-r3,r4-r12,lr}
 	bx lr
 	endp
 ;Section ROM code (read only) :		
