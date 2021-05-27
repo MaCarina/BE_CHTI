@@ -22,46 +22,22 @@
 	area    moncode,code,readonly
 ; écrire le code ici		
 DFT_ModuleAuCarre proc
-		push {r4-r11,lr}
-		mov r12,#0 ;indice de boucle
-		mov r4,#0
-	
-boucle	
+		push {r0-r3,lr}
+		ldr r2,[r1] ;passage de k dans r2
+		ldr r1,[r0] ;passage de X(n) dans r1
+		ldr r0,=TabCos
+		b CalculerPartie
+		ldr r3,[r0]
+		;r3=résultat cos
+		ldr r0,=TabSin
+		b CalculerPartie
+		;r0=résultat sin
+		;somme des 2 résultats
+		add r3,r3,r0
+		;mise au carré
+		mul r3,r3
 		
-		;multiplication par k qui est dans r1 car paramètre = p
-		mul r7,r12,r1
-		;récupérer les cos
-		ldr r11,=TabCos
-		;décalage dans les échantillons 1.15
-		ldrsh r11,[r11,r7,lsl#1]
-		
-		;récupérer les sin
-		;ldr r6,=TabSin
-		;ldr r5,r6
-		;décalage dans les échantillons
-		;ldr r5,[r5,r12,lsl#1]
-		
-		;décalage dans les échantillons 1.12
-		ldrsh r3,[r0,r12,lsl#1]
-		;multiplication de x(n) et cos 2.27
-		mul r3,r3,r11
-		;décalage pour avoir le bon format 2.22
-		asr r3,#5
-		
-		;somme de tous les termes 8.22
-		add r4,r4,r3
-		
-		
-		add r12,r12,#1 ;index
-		;comparer avec valeur max d'index = 64
-		ldr r8,=64
-		cmp r12,r8
-		bne boucle
-	
-	
-		mov r0,r4
-		mul r0,r0,r0
-		pop {r4-r11,lr}
+		pop {r0-r3,lr}
 		bx lr
 		endp
 			
@@ -71,7 +47,34 @@ boucle
 		;faire x k
 		;format (demander à Ainhoa)
 
-
+CalculerPartie proc
+	;r0 : TabCos / TabSin - 1.15
+	;r1 : X(n) - 4.12
+	;r2 : k
+	;r12 : indice n
+	;r7 : p (=k*n)
+	;r11 : cos/sin(k*n*...)
+	;r3 : x(n)
+	;r4 : resultat
+	;comparer avec valeur max d'index = 64
+	push {r4-r12,lr}
+	mov r4,#0 ;résultat
+	mov r12,#0 ;indice de boucle
+boucle
+	mul r7,r12,r2
+	and r7,r7,#63
+	ldrsh r11,[r0,r7,lsl#1] ; décalage dans les cos/sin
+	ldrsh r3,[r1,r12,lsl#1] ; décalage dans le signal
+	mla r4,r11,r3,r4 ; r4 = r11*r3 + r4 E.F * E'.F' => E+E',F+F' donc ici 5.27
+	
+	add r12,r12,#1 ;index
+	ldr r8,=64
+	cmp r12,r8
+	bne boucle
+	mov r0,r4
+	pop {r4-r12,lr}
+	bx lr
+	endp
 ;Section ROM code (read only) :		
 	AREA Trigo, DATA, READONLY
 ; codage fractionnaire 1.15
