@@ -28,26 +28,31 @@ DFT_ModuleAuCarre proc
 	
 boucle	
 		
+		;multiplication par k qui est dans r1 car paramètre = p
+		mul r7,r12,r1
 		;récupérer les cos
 		ldr r11,=TabCos
-		;décalage dans les échantillons
-		ldrsh r11,[r11,r12,lsl#1]
+		;décalage dans les échantillons 1.15
+		ldrsh r11,[r11,r7,lsl#1]
 		
 		;récupérer les sin
 		;ldr r6,=TabSin
-		;ldr r1,r6
+		;ldr r5,r6
 		;décalage dans les échantillons
-		;ldr r1,[r1,r12,lsl#1]
+		;ldr r5,[r5,r12,lsl#1]
 		
-		;décalage dans les échantillons
+		;décalage dans les échantillons 1.12
 		ldrsh r3,[r0,r12,lsl#1]
-		;multiplication
+		;multiplication de x(n) et cos 2.27
 		mul r3,r3,r11
-		;somme de tous les termes
+		;décalage pour avoir le bon format 2.22
+		asr r3,#5
+		
+		;somme de tous les termes 8.22
 		add r4,r4,r3
 		
 		
-		add r12,r12,#1
+		add r12,r12,#1 ;index
 		;comparer avec valeur max d'index = 64
 		ldr r8,=64
 		cmp r12,r8
